@@ -6,10 +6,11 @@ var Hscore = 0;
 var scorenum=0;
 let audio, yeet;
 let speed = 1, negspeed = -1;
+let yeetTrack = false;
 
 function preload() {
   audio = new Audio('Music/beats.mp3');
-  // yeet = new Audio('Music/sped.mp3')
+  yeet = new Audio('Music/sped.mp3')
 }
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -41,11 +42,13 @@ function dead(){
     s = new snake();
     scorenum = 0;
     picklocation();
-    if (hardMusic) {
-      yeet.stop();
-      hardMusic = false;
+    frameRate(25);
+    speed = 1, negspeed = -1;
+    if(yeetTrack) {
+      yeetTrack = false;
+      yeet.pause();
+      audio.play();
     }
-    hardLevelStart = false;
   }
   else {
     for (var i = 0; i < s.tail.length; i ++){
@@ -54,6 +57,13 @@ function dead(){
         s = new snake();
         scorenum = 0;
         picklocation();
+        frameRate(25);
+        speed = 1, negspeed = -1;
+        if(yeetTrack) {
+          yeetTrack = false;
+          yeet.pause();
+          audio.play();
+        }
       }
     }
   }
@@ -61,7 +71,7 @@ function dead(){
 function picklocation(){
   var row = floor(windowWidth / pix)-10;
   var col = floor(windowHeight / pix)-10;
-  randomfood= floor(random(6));
+  randomfood = floor(random(6));
   food1 = createVector(floor(random(row)),floor(random(col)));
   food1.mult(pix);
   food2 = createVector(floor(random(row)),floor(random(col)));
@@ -82,6 +92,7 @@ function showfood(){
   }
 }
 var gamename = '';
+
 function copyright(){
   var gamename = 'Snake Game';
   textSize(100);
@@ -108,18 +119,7 @@ function score(){
   text(Highscore, 10, 60);
 
 }
-function hardLevel() {
-  background(51);
-  if (eat()) picklocation();
-  s.update();
-  s.show();
-  score();
-  showfood()
-  dead();
-  speed = 3;
-  negspeed = -3;
-}
-let musicStarted = false, hardLevelStart = false, hardMusic = false;
+let musicStarted = false;
 function gameStart() {
   background(51);
   if (eat()) picklocation();
@@ -130,42 +130,53 @@ function gameStart() {
   showfood()
   dead();
 }
-/*function mouseClicked() {
-  if (scorenum >= 30) return;
-  else if (musicStarted === false) {
-    console.log('PLaying')
-    musicStarted = true;
-    audio.play();
-  } else {
-    musicStarted = false;
-    audio.pause();
-    console.log('Loop Toggled')
-  }
-}*/
+let bg = false;
 function draw() {
-  if (scorenum >= 30) {
-    hardLevelStart = true;
-    hardLevel();
-    textSize(100);
-    fill(255, 255, 255, 20);
-    nameWidht = textWidth('Yeet');
-    text('Yeet', (width - nameWidht)/2, height/2);
+  if (scorenum >= 100) {
+    background(51);
+    fill(237, 245, 225)
+    textSize(200)
+    text('how u do dis', windowWidth/2 - 600, windowHeight/2);
+    audio.pause();
+    yeet.pause();
+    return;
+  }
+   else if (scorenum >= 30) {
+     audio.pause();
+     yeet.play();
+     yeetTrack = true;
+      if (bg) {
+        bg = false;
+        background(200);
+      } else {
+        bg = true;
+        background(0);
+    }
+      frameRate(100);
+      if (eat()) picklocation();
+      s.update();
+      s.show();
+      score();
+      showfood()
+      dead();
+      textSize(100);
+      fill(255, 255, 255, 20);
+      nameWidht = textWidth('Yeet');
+      text('Yeet', (width - nameWidht)/2, height/2);
   }
   else if (musicStarted === true) {
-    hardLevelStart = false;
     gameStart();
-  } else {
-    hardLevelStart = false;
+  } 
+  else {
     background(51);
     fill(237, 245, 225)
     textSize(200)
     text('Snake', windowWidth/2 - 250, windowHeight/2);
     textSize(30)
-    text('  Use the Arrow Keys to Move\nPress Space to Start or Pause', windowWidth/2 - 200, windowHeight/2 + 100)
-  }
-  if (scorenum >= 30 && !hardMusic) {
-    hardMusic = true;
-    // yeet.play();
+    text(`
+      Use the Arrow Keys to Move
+     Press Space to Start or Pause`, windowWidth/2 - 200, windowHeight/2 + 100)
+     text('Reach 100 and dont get arrested', windowWidth/2 - 175, windowHeight/2 + 300)
   }
 }
 function keyPressed(){
@@ -185,9 +196,14 @@ function keyPressed(){
     if (s.xspeed != speed)
     s.dir(negspeed, 0);
   }
+  if (keyCode == 187) {
+    scorenum += 29;
+    textSize(200) 
+    text('Hacks Toggled', 100, 100);
+  }
   // Spacebar Stuff
   if (keyCode == 32) {
-    if (scorenum >= 30) return audio.pause();
+    if (scorenum >= 30) return;
   else if (musicStarted === false) {
     console.log('Play Toggled')
     musicStarted = true;
